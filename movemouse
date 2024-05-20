@@ -20,7 +20,7 @@
 # trap ctrl-c and call ctrl_c()
 trap ctrl_c INT
 function ctrl_c() {
-    echo "| [w] User abort"
+    echo "| User abort"
 }
 
 INSTALL_PATH=~/bin/lazycorp/lzvenv

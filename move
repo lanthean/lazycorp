@@ -29,48 +29,53 @@ import os
 # endTime = "16:25" 
 endTime = "23:59"
 inactivityTimeoutSeconds = 20
+activityCounter = 0
+moveCounter = 0
 
 ## Functions
 def MouseMove(x, y):
-        event = CGEventCreateMouseEvent(None, kCGEventMouseMoved, (x, y), kCGMouseButtonLeft)
-        CGEventPost(kCGHIDEventTap, event)
+    global moveCounter
+    event = CGEventCreateMouseEvent(None, kCGEventMouseMoved, (x, y), kCGMouseButtonLeft)
+    CGEventPost(kCGHIDEventTap, event)
+    moveCounter += 1
+    print("  moving mouse for user #{}".format(moveCounter))
+    time.sleep(inactivityTimeoutSeconds)
 
 def UserActive():
+    global activityCounter
     inactivity = os.popen("ioreg -c IOHIDSystem | awk '/HIDIdleTime/ {print $NF/1000000000; exit}'").read()
     if abs(float(inactivity) - 0.0) < inactivityTimeoutSeconds:
-        print("inactivity < {}s: {}s".format(inactivityTimeoutSeconds, float(inactivity)))
+        activityCounter += 1
+        print("  inactivity < {}s: {}s".format(inactivityTimeoutSeconds, float(inactivity)))
         time.sleep(inactivityTimeoutSeconds)
         return True
     else:
         return False
 
 def signal_handler(sig, frame):
-    print("\n| [w] Ctrl+C caught!")
+    print("\n| Ctrl+C caught!")
+    print("| Number of times user was found active:    #{}".format(activityCounter))
+    print("| Number of times mouse was moved for user: #{}".format(moveCounter))
     sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
 
 #start time of the script
-print("Script has been started: {}".format(datetime.now()))
-print("Planned end of the script at: {}".format(endTime))
-print("Running...")
+print("| Script has been started: {}".format(datetime.now()))
+print("| Planned end of the script at: {}".format(endTime))
+print("| Running...")
 
 while True:
     currentTime = datetime.now().strftime("%H:%M")
     if currentTime >= endTime :
-       print("Script had ended at " + datetime.now().strftime("%H:%M"))
+       print("| Number of times user was found active:    #{}".format(inactivityCounter))
+       print("| Number of times mouse was moved for user: #{}".format(moveCounter))
+       print("| Script had ended at " + datetime.now().strftime("%H:%M"))
        exit()
     
     if UserActive(): continue
-    
-    print("moving mouse for user")
     MouseMove(600, 600)
-    time.sleep(inactivityTimeoutSeconds)
-
     if UserActive(): continue
-    
-    print("moving mouse for user")
     MouseMove(650, 650)    
-    time.sleep(inactivityTimeoutSeconds)
     
 ############################################################################
