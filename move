@@ -52,11 +52,15 @@ def UserActive():
     else:
         return False
 
-def signal_handler(sig, frame):
-    print("\n| Ctrl+C caught!")
+def lzExit():
     print("| Number of times user was found active:    #{}".format(activityCounter))
     print("| Number of times mouse was moved for user: #{}".format(moveCounter))
-    sys.exit(0)
+    print("| Script had ended at " + datetime.now().strftime("%H:%M"))
+    exit()
+
+def signal_handler(sig, frame):
+    print("\n| Ctrl+C caught!")
+    lzExit()
 
 signal.signal(signal.SIGINT, signal_handler)
 
@@ -68,10 +72,7 @@ print("| Running...")
 while True:
     currentTime = datetime.now().strftime("%H:%M")
     if currentTime >= endTime :
-       print("| Number of times user was found active:    #{}".format(inactivityCounter))
-       print("| Number of times mouse was moved for user: #{}".format(moveCounter))
-       print("| Script had ended at " + datetime.now().strftime("%H:%M"))
-       exit()
+       lzExit()
     
     if UserActive(): continue
     MouseMove(600, 600)
