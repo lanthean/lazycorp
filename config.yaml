@@ -1,0 +1,6 @@
+{
+    logLevel: logging.INFO,
+    inactivityTimeoutSeconds: 20,
+    endTime: "16:25"
+  # endTime: "23:59"
+}
