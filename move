@@ -78,8 +78,7 @@ signal.signal(signal.SIGINT, signal_handler)
 
 ## Config
 cfg = LoadConfiguration(configFile)
-# print(cfg['logLevel'])
-# exit()
+
 ## Logging
 # Configure logging
 logging.addLevelName(logging.DEBUG, 'd')
