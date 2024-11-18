@@ -1,6 +1,6 @@
 # lazycorp
 
-Move your MacOS mouse for your lazy ass ;-)
+Move your Ubuntu mouse for your lazy ass ;-)
 
 ## installation
 
