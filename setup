@@ -20,8 +20,10 @@
 INSTALL_PATH=~/bin/lazycorp
 venv_name=lzvenv
 
+sudo apt install -y xprintidle
+
 [[ -d $INSTALL_PATH ]] || mkdir -p $INSTALL_PATH
-cp move* requirements.txt $INSTALL_PATH/
+cp move* requirements.txt config.yaml $INSTALL_PATH/
 ln -s ~/bin/lazycorp/movemouse ~/bin/movemouse
 
 pushd $INSTALL_PATH
@@ -30,5 +32,6 @@ source $venv_name/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 popd
+
 #EOF
 ###

@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-
 ############################################################################
 #                                                                          #
 #  ##          ##      ########  ##   ##   ###      ###    ####     ####   #
@@ -13,23 +12,21 @@
 
 #kill command:
 #for pid in $(pgrep -f move); do kill -9 $pid; done
-from Quartz.CoreGraphics import CGEventCreateMouseEvent
-from Quartz.CoreGraphics import CGEventPost
-from Quartz.CoreGraphics import kCGMouseButtonLeft
-from Quartz.CoreGraphics import kCGEventMouseMoved
-from Quartz.CoreGraphics import kCGHIDEventTap
+
 import time
 from datetime import datetime
 import signal
 import logging
 import os
 import yaml
+from Xlib import X, display
+from Xlib.ext import xtest
 
 ## Measure time
 start = time.perf_counter()
 
 ## Globals
-configFile="../config.yaml"
+configFile = "../config.yaml"
 # endTime and logLevel is set ^ in config.yaml
 activityCounter = 0
 moveCounter = 0
@@ -38,18 +35,22 @@ cfg = ""
 ## Functions
 def MouseMove(x, y):
     global moveCounter
-    event = CGEventCreateMouseEvent(None, kCGEventMouseMoved, (x, y), kCGMouseButtonLeft)
-    CGEventPost(kCGHIDEventTap, event)
+    d = display.Display()
+    screen = d.screen()
+    root = screen.root
+    root.warp_pointer(x, y)
+    d.sync()
     moveCounter += 1
-    log.debug("moving mouse for user #{}".format(moveCounter))
+    log.debug("Moving mouse for user #{}".format(moveCounter))
     time.sleep(cfg['inactivityTimeoutSeconds'])
 
 def UserActive():
     global activityCounter
-    inactivity = os.popen("ioreg -c IOHIDSystem | awk '/HIDIdleTime/ {print $NF/1000000000; exit}'").read()
-    if abs(float(inactivity) - 0.0) < cfg['inactivityTimeoutSeconds']:
+    # Use `xprintidle` to get idle time in milliseconds
+    idle_time = int(os.popen("xprintidle").read().strip()) / 1000  # Convert to seconds
+    if idle_time < cfg['inactivityTimeoutSeconds']:
         activityCounter += 1
-        log.debug("inactivity < {}s: {}s".format(cfg['inactivityTimeoutSeconds'], float(inactivity)))
+        log.debug("Inactivity < {}s: {}s".format(cfg['inactivityTimeoutSeconds'], idle_time))
         time.sleep(cfg['inactivityTimeoutSeconds'])
         return True
     else:
@@ -66,7 +67,7 @@ def lzExit():
     timeRunInSeconds = time.perf_counter() - start
     m, s = divmod(timeRunInSeconds, 60)
     h, m = divmod(m, 60)
-    log.info("Script had ended at {}, ran for {}h {}m {}s".format(datetime.now().strftime("%H:%M"), int(h), int(m), int(s)))
+    log.info("Script ended at {}, ran for {}h {}m {}s".format(datetime.now().strftime("%H:%M"), int(h), int(m), int(s)))
     exit()
 
 def signal_handler(sig, frame):
@@ -91,18 +92,18 @@ logging.basicConfig(level=eval(cfg['logLevel']), format='| [%(levelname)s] %(mes
 log = logging.getLogger('LazyCorpMoveMouse')
 
 # Start the run
-log.info("Script has been started: {}".format(datetime.now()))
+log.info("Script started: {}".format(datetime.now()))
 log.info("Planned end of the script at: {}".format(cfg['endTime']))
 log.info("Running...")
 
 while True:
     currentTime = datetime.now().strftime("%H:%M")
-    if currentTime >= cfg['endTime'] :
-       lzExit()
+    if currentTime >= cfg['endTime']:
+        lzExit()
     
-    if UserActive(): continue
+    if UserActive(): 
+        continue
     MouseMove(600, 600)
-    if UserActive(): continue
-    MouseMove(650, 650)    
-    
-############################################################################
+    if UserActive(): 
+        continue
+    MouseMove(650, 650)
