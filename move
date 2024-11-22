@@ -33,12 +33,20 @@ moveCounter = 0
 cfg = ""
 
 ## Functions
-def MouseMove(x, y):
+def MouseMove(x, y, relative=False, positive=True):
     global moveCounter
     d = display.Display()
     screen = d.screen()
     root = screen.root
-    root.warp_pointer(x, y)
+    if relative:
+        log.debug("Move mouse relative to current position")
+        pointer = root.query_pointer()
+        if positive: relative_difference = 1
+        else: relative_difference = -1
+        log.debug("root.warp_pointer({} + {}, {} + {})".format(pointer.root_x, relative_difference, pointer.root_y, relative_difference))
+        root.warp_pointer(pointer.root_x + relative_difference, pointer.root_y + relative_difference)
+    else:
+        root.warp_pointer(x, y)
     d.sync()
     moveCounter += 1
     log.debug("Moving mouse for user #{}".format(moveCounter))
@@ -67,7 +75,7 @@ def lzExit():
     timeRunInSeconds = time.perf_counter() - start
     m, s = divmod(timeRunInSeconds, 60)
     h, m = divmod(m, 60)
-    log.info("Script ended at {}, ran for {}h {}m {}s".format(datetime.now().strftime("%H:%M"), int(h), int(m), int(s)))
+    log.info("Script ended at {}, ran for {}h:{}m:{}s".format(datetime.now().strftime("%H:%M"), int(h), int(m), int(s)))
     exit()
 
 def signal_handler(sig, frame):
@@ -103,7 +111,7 @@ while True:
     
     if UserActive(): 
         continue
-    MouseMove(600, 600)
+    MouseMove(600, 1080, True, True)
     if UserActive(): 
         continue
-    MouseMove(650, 650)
+    MouseMove(650, 1080, True, False)
