@@ -20,12 +20,14 @@
 INSTALL_PATH=~/bin/lazycorp
 venv_name=lzvenv
 
-sudo apt install -y xprintidle
-
 [[ -d $INSTALL_PATH ]] || mkdir -p $INSTALL_PATH
 cp move* requirements.txt config.yaml $INSTALL_PATH/
-ln -s ~/bin/lazycorp/movemouse ~/bin/movemouse
+ln -sf ~/bin/lazycorp/movemouse ~/bin/movemouse
 
+# `setup copy` will result only in copymode, skipping installations
+[[ "$1" == "co"* ]] && exit 100
+
+sudo apt install -y xprintidle
 pushd $INSTALL_PATH
 virtualenv $venv_name
 source $venv_name/bin/activate
